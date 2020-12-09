@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%=title%></title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="text-center">Bulk Domain Name Age Checker</h1>
+      <form id="form">
+        <div class="form-group">
+          <label for="domain">Enter Domains URL: (One Per Line)</label>
+          <textarea
+            class="form-control"
+            rows="10"
+            cols="20"
+            id="domains"
+            placeholder="Domain names"
+            required
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <button id="button" class="btn btn-block btn-danger">
+            Get Domain Age
+          </button>
+        </div>
+      </form>
+      <div>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Domain URL</th>
+              <th>Domain Age</th>
+            </tr>
+          </thead>
+          <tbody id="body"></tbody>
+        </table>
+      </div>
+      <br /><br />
+    </div>
+  </body>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/psl/1.8.0/psl.min.js"></script>
+  <script>
+    $("#form").submit(function (e) {
+      e.preventDefault();
+
+      var domains = $("#domains").val().split("\n");
+
+      $("#body").empty();
+
+      $("#button").text("Checking Domain Age Please Wait");
+
+      $("#button").prop("disabled", "true");
+
+      console.log(domains);
+
+      domains.forEach((domain) => {
+        
+
+        var domain;
+
+        domain = domain
+          .replace(/^(?:https?:\/\/)?(?:www\.)?/i, "")
+          .split("/")[0];
+
+        $.ajax({
+          method: "POST",
+          url: "/getbaseurl",
+          data: { domain: domain },
+          success: function (data) {
+            console.log(data.baseurl);
+
+            $.ajax({
+              method: "POST",
+              url: "/singledomainagechecker",
+              data: { domain: data.baseurl },
+              success: function (data) {
+                console.log(data.domainage);
+                $("#button").text("Get Domain Age");
+
+                document.getElementById("button").disabled = false;
+
+                $("#body").append(`
+                  <tr>
+                     <td>${data.domain}</td>
+                     <td>${data.domainage}</td> 
+                  </tr>
+
+                  `);
+              },
+            });
+          },
+        });
+      });
+    });
+  </script>
+</html>
